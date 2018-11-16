@@ -12,13 +12,17 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.physics.box2d.*
 import com.google.inject.*
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 
 
 class JmpGame : ApplicationAdapter() {
     internal lateinit var batch: SpriteBatch
-    private lateinit var img: Texture
     private val engine = Engine()
     private lateinit var injector: Injector
+
+    companion object {
+        internal lateinit var img: Texture
+    }
 
     override fun create() {
         batch = SpriteBatch()
@@ -61,6 +65,30 @@ class JmpGame : ApplicationAdapter() {
             body.setTransform(transform.position, 0F)
             add(PhysicsComponent(body))
         })
+        //left wall
+        engine.addEntity(Entity().apply {
+            add(TransformComponent(Vector2(-1f,20f)))
+            val body = world.createBody(BodyDef().apply {
+                type = BodyDef.BodyType.StaticBody
+            })
+            body.createFixture(PolygonShape().apply {
+                setAsBox(1F, 60F)
+            }, 1.0F)
+            body.setTransform(transform.position, 0F)
+            add(PhysicsComponent(body))
+        })
+        //right wall
+        engine.addEntity(Entity().apply {
+            add(TransformComponent(Vector2(26f,20f)))
+            val body = world.createBody(BodyDef().apply {
+                type = BodyDef.BodyType.StaticBody
+            })
+            body.createFixture(PolygonShape().apply {
+                setAsBox(1F, 60F)
+            }, 1.0F)
+            body.setTransform(transform.position, 0F)
+            add(PhysicsComponent(body))
+        })
     }
 
 
@@ -86,9 +114,10 @@ class MyInputAdapter @Inject constructor(private val camera: OrthographicCamera,
         println("WorldX: ${worldPosition.x}        WorldY: ${worldPosition.y}")
 
 
-        //
+
         engine.addEntity(Entity().apply{
-            add(TransformComponent(Vector2(worldPosition.x, worldPosition.y)))
+            add(TextureRegionComponent(TextureRegion(JmpGame.img)))
+            add(TransformComponent(Vector2(worldPosition.x, worldPosition.y), 0F, 0.25F))
 
             val body = world.createBody(BodyDef().apply {
                 type = BodyDef.BodyType.DynamicBody
@@ -100,12 +129,13 @@ class MyInputAdapter @Inject constructor(private val camera: OrthographicCamera,
             add(PhysicsComponent(body))
 
         })
-        //
+
 
         return true
 
     }
 }
+
 
 val Int.pixelsToMeters: Float
     get() = this / Constants.PIXELS_PER_METER

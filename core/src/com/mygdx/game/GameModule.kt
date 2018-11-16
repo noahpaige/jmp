@@ -21,6 +21,7 @@ class GameModule(private val myGdxGame: JmpGame) : Module {
     fun systems() : Systems {
         return Systems(listOf(
                 PhysicsSystem::class.java,
+                BoxSpawnSystem::class.java,
                 PhysicsSynchronizationSystem::class.java,
                 RenderingSystem::class.java,
                 PhysicsDebugSystem::class.java
