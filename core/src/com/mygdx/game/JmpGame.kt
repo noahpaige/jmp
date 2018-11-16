@@ -26,7 +26,7 @@ class JmpGame : ApplicationAdapter() {
 
     override fun create() {
         batch = SpriteBatch()
-        img = Texture("badlogic.jpg")
+        img = Texture("itsame.png")
         injector = Guice.createInjector(GameModule(myGdxGame = this))
         injector.getInstance(Systems::class.java).list.map {
             injector.getInstance(it)}.forEach{ system -> engine.addSystem(system)}
@@ -55,7 +55,7 @@ class JmpGame : ApplicationAdapter() {
         })
         //floor entity
         engine.addEntity(Entity().apply {
-            add(TransformComponent(Vector2(Constants.SCREEN_MIDDLE_X,0f)))
+            add(TransformComponent(Vector2(Constants.SCREEN_MIDDLE_X,-1f)))
             val body = world.createBody(BodyDef().apply {
                 type = BodyDef.BodyType.StaticBody
             })
@@ -93,7 +93,7 @@ class JmpGame : ApplicationAdapter() {
 
 
     override fun render() {
-        Gdx.gl.glClearColor(1f, 0f, 0f, 1f)
+        Gdx.gl.glClearColor(0.3f, 0.7f, 0.7f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         engine.update(Gdx.graphics.deltaTime)
     }
