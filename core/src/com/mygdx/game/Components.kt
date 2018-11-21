@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
@@ -33,6 +34,12 @@ class TextureRegionComponent(val textureRegion : TextureRegion) : Component {
 val Entity.textureRegion : TextureRegionComponent
     get() = TextureRegionComponent[this]
 
+class SpriteComponent(val sprite : Sprite) : Component {
+    companion object : ComponentResolver<SpriteComponent>(SpriteComponent::class.java)
+}
+val Entity.sprite : SpriteComponent
+    get() = SpriteComponent[this]
+
 
 
 class PhysicsComponent(val body : Body) : Component {
@@ -48,6 +55,7 @@ open class ComponentResolver<T : Component>(componentClass: Class<T>){
     operator fun get(entity: Entity) = MAPPER.get(entity)
 }
 
-fun <T : Component> Entity.tryGet(componentResolver: ComponentResolver<T>) : T? {
+fun <T : Component> Entity. tryGet(componentResolver: ComponentResolver<T>): T? {
+    //println("Getting " + componentResolver.MAPPER.get(this))
     return componentResolver.MAPPER.get(this)
 }

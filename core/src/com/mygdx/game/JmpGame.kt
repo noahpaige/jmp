@@ -22,6 +22,7 @@ class JmpGame : ApplicationAdapter() {
 
     companion object {
         internal lateinit var img: Texture
+        internal lateinit var playerBody: Body
     }
 
     override fun create() {
@@ -40,24 +41,27 @@ class JmpGame : ApplicationAdapter() {
         val world = injector.getInstance(World::class.java)
         //player entity
         engine.addEntity(Entity().apply{
-            add(TextureComponent(img))
-            add(TransformComponent(Vector2(Constants.SCREEN_MIDDLE_X,20F)))
+            add(TextureRegionComponent(TextureRegion(JmpGame.img)))
+            //add(TextureComponent(img))
+            add(TransformComponent(Vector2(Constants.SCREEN_MIDDLE_X,5F)))
 
-            val body = world.createBody(BodyDef().apply {
+            playerBody = world.createBody(BodyDef().apply {
                 type = BodyDef.BodyType.DynamicBody
             })
-            body.createFixture(PolygonShape().apply {
+            playerBody.createFixture(PolygonShape().apply {
                 setAsBox(img.width.pixelsToMeters / 2.0F, img.height.pixelsToMeters / 2.0F)
             }, 1.0F)
-            body.setTransform(transform.position, 0F)
-            add(PhysicsComponent(body))
+            playerBody.setTransform(transform.position, 0F)
+            playerBody.isFixedRotation = true
+            add(PhysicsComponent(playerBody))
+
 
         })
         //floor entity
         engine.addEntity(Entity().apply {
             add(TransformComponent(Vector2(Constants.SCREEN_MIDDLE_X,-1f)))
             val body = world.createBody(BodyDef().apply {
-                type = BodyDef.BodyType.StaticBody
+                type = BodyDef.BodyType.KinematicBody
             })
             body.createFixture(PolygonShape().apply {
                 setAsBox(20F, 1F)
@@ -69,7 +73,7 @@ class JmpGame : ApplicationAdapter() {
         engine.addEntity(Entity().apply {
             add(TransformComponent(Vector2(-1f,20f)))
             val body = world.createBody(BodyDef().apply {
-                type = BodyDef.BodyType.StaticBody
+                type = BodyDef.BodyType.KinematicBody
             })
             body.createFixture(PolygonShape().apply {
                 setAsBox(1F, 60F)
@@ -81,7 +85,7 @@ class JmpGame : ApplicationAdapter() {
         engine.addEntity(Entity().apply {
             add(TransformComponent(Vector2(26f,20f)))
             val body = world.createBody(BodyDef().apply {
-                type = BodyDef.BodyType.StaticBody
+                type = BodyDef.BodyType.KinematicBody
             })
             body.createFixture(PolygonShape().apply {
                 setAsBox(1F, 60F)
@@ -93,9 +97,12 @@ class JmpGame : ApplicationAdapter() {
 
 
     override fun render() {
+
         Gdx.gl.glClearColor(0.3f, 0.7f, 0.7f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         engine.update(Gdx.graphics.deltaTime)
+        val accelX = Gdx.input.accelerometerX
+        println("accelX: " + accelX)
     }
 
     override fun dispose() {
@@ -113,29 +120,15 @@ class MyInputAdapter @Inject constructor(private val camera: OrthographicCamera,
         val worldPosition = camera.unproject(Vector3(screenX.toFloat(), screenY.toFloat(),0f))
         println("WorldX: ${worldPosition.x}        WorldY: ${worldPosition.y}")
 
-
-
-        engine.addEntity(Entity().apply{
-            add(TextureRegionComponent(TextureRegion(JmpGame.img)))
-            add(TransformComponent(Vector2(worldPosition.x, worldPosition.y), 0F, 0.25F))
-
-            val body = world.createBody(BodyDef().apply {
-                type = BodyDef.BodyType.DynamicBody
-            })
-            body.createFixture(PolygonShape().apply {
-                setAsBox(1F, 1F)
-            }, 1.0F)
-            body.setTransform(transform.position, 0F)
-            add(PhysicsComponent(body))
-
-        })
-
+        JmpGame.playerBody.applyLinearImpulse(Vector2(0f, 500f),
+                JmpGame.playerBody.transform.position,
+                true)
+        //JmpGame.playerBody.applyForceToCenter(Vector2(0f, 10000f), true)
 
         return true
 
     }
 }
-
 
 val Int.pixelsToMeters: Float
     get() = this / Constants.PIXELS_PER_METER
