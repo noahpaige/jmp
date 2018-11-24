@@ -32,11 +32,17 @@ class BoxSpawnSystem @Inject constructor(private val camera: OrthographicCamera,
                 })
                 body.createFixture(PolygonShape().apply {
                     setAsBox(2F, 2F)
-                }, 1.0F)
+                }, 100.0f)
                 body.setTransform(transform.position, 0F)
+                body.isFixedRotation = true
                 add(PhysicsComponent(body))
+                body.userData = EntityData("block", false)
+                body.gravityScale = 0.2f
 
+                //body.setLinearVelocity(0f, -10f)
+                //body.userData = EntityData("block")
             })
+            println("SPAWNED BOX AT " + pos.x + "    " + pos.y)
         }
         else{
             counter += deltaTime

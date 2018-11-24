@@ -7,6 +7,11 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.MathUtils
 import com.google.inject.Inject
+import com.badlogic.gdx.physics.box2d.Contact
+import com.badlogic.gdx.physics.box2d.ContactImpulse
+import com.badlogic.gdx.physics.box2d.ContactListener
+import com.badlogic.gdx.physics.box2d.Manifold
+
 
 class RenderingSystem @Inject constructor(private val batch: SpriteBatch,
                                           private val camera: OrthographicCamera) :
@@ -59,6 +64,7 @@ class RenderingSystem @Inject constructor(private val batch: SpriteBatch,
         }
     }
 }
+
 
 val Float.toDegrees : Float
     get() = MathUtils.radiansToDegrees * this

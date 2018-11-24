@@ -16,7 +16,7 @@ class PhysicsSystem @Inject constructor(private val world: World) : EntitySystem
     }
     companion object {
         private val TIME_STEP = 1.0F / 300.0F
-        private val VELOCITY_ITERATIONS = 6
-        private val VELOCITY_POSITIONS = 2
+        private val VELOCITY_ITERATIONS = 10
+        private val VELOCITY_POSITIONS = 8
     }
 }

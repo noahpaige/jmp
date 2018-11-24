@@ -13,16 +13,19 @@ import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.physics.box2d.*
 import com.google.inject.*
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.physics.box2d.joints.DistanceJoint
+import com.badlogic.gdx.physics.box2d.joints.DistanceJointDef
 
 
 class JmpGame : ApplicationAdapter() {
     internal lateinit var batch: SpriteBatch
-    private val engine = Engine()
+    private val engine = JMPEngine()
     private lateinit var injector: Injector
 
     companion object {
         internal lateinit var img: Texture
         internal lateinit var playerBody: Body
+        internal lateinit var floorBody: Body
     }
 
     override fun create() {
@@ -53,56 +56,36 @@ class JmpGame : ApplicationAdapter() {
             }, 1.0F)
             playerBody.setTransform(transform.position, 0F)
             playerBody.isFixedRotation = true
+            playerBody.userData = EntityData("player", true)
             add(PhysicsComponent(playerBody))
-
 
         })
         //floor entity
         engine.addEntity(Entity().apply {
             add(TransformComponent(Vector2(Constants.SCREEN_MIDDLE_X,-1f)))
-            val body = world.createBody(BodyDef().apply {
-                type = BodyDef.BodyType.KinematicBody
+            floorBody = world.createBody(BodyDef().apply {
+                type = BodyDef.BodyType.StaticBody
             })
-            body.createFixture(PolygonShape().apply {
+            floorBody.createFixture(PolygonShape().apply {
                 setAsBox(20F, 1F)
             }, 1.0F)
-            body.setTransform(transform.position, 0F)
-            add(PhysicsComponent(body))
+            floorBody.setTransform(transform.position, 0F)
+            add(PhysicsComponent(floorBody))
+            floorBody.userData = EntityData("floor", false)
+            floorBody.gravityScale = 0f
+
         })
-        //left wall
-        engine.addEntity(Entity().apply {
-            add(TransformComponent(Vector2(-1f,20f)))
-            val body = world.createBody(BodyDef().apply {
-                type = BodyDef.BodyType.KinematicBody
-            })
-            body.createFixture(PolygonShape().apply {
-                setAsBox(1F, 60F)
-            }, 1.0F)
-            body.setTransform(transform.position, 0F)
-            add(PhysicsComponent(body))
-        })
-        //right wall
-        engine.addEntity(Entity().apply {
-            add(TransformComponent(Vector2(26f,20f)))
-            val body = world.createBody(BodyDef().apply {
-                type = BodyDef.BodyType.KinematicBody
-            })
-            body.createFixture(PolygonShape().apply {
-                setAsBox(1F, 60F)
-            }, 1.0F)
-            body.setTransform(transform.position, 0F)
-            add(PhysicsComponent(body))
-        })
+        val listenerClass = ListenerClass(world)
+        world.setContactListener(listenerClass)
     }
 
 
     override fun render() {
 
-        Gdx.gl.glClearColor(0.3f, 0.7f, 0.7f, 1f)
+        //Gdx.gl.glClearColor(0.3f, 0.7f, 0.7f, 1f)
+        Gdx.gl.glClearColor(0f,0f,0f,1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         engine.update(Gdx.graphics.deltaTime)
-        val accelX = Gdx.input.accelerometerX
-        println("accelX: " + accelX)
     }
 
     override fun dispose() {
@@ -119,16 +102,22 @@ class MyInputAdapter @Inject constructor(private val camera: OrthographicCamera,
         println("ScreenX: $screenX        ScreenY: $screenY")
         val worldPosition = camera.unproject(Vector3(screenX.toFloat(), screenY.toFloat(),0f))
         println("WorldX: ${worldPosition.x}        WorldY: ${worldPosition.y}")
-
-        JmpGame.playerBody.applyLinearImpulse(Vector2(0f, 500f),
-                JmpGame.playerBody.transform.position,
-                true)
-        //JmpGame.playerBody.applyForceToCenter(Vector2(0f, 10000f), true)
+        val data = JmpGame.playerBody.userData
+        if(data is EntityData){
+            if(data.canJump){
+                JmpGame.playerBody.linearVelocity = Vector2(JmpGame.playerBody.linearVelocity.x,0f)
+                JmpGame.playerBody.applyLinearImpulse(Vector2(0f, Constants.PLAYER_VERTICAL_FORCE_FACTOR),
+                        JmpGame.playerBody.transform.position,
+                        true)
+                data.canJump = false
+            }
+        }
 
         return true
-
     }
+
 }
+
 
 val Int.pixelsToMeters: Float
     get() = this / Constants.PIXELS_PER_METER
