@@ -3,6 +3,7 @@ package com.mygdx.game
 import com.badlogic.ashley.core.Engine
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
+import kotlin.math.max
 
 class JMPEngine : Engine() {
     override fun update(deltaTime: Float) {
@@ -13,8 +14,13 @@ class JMPEngine : Engine() {
             //applyForceToCenter(Vector2(accelX * -Constants.PLAYER_HORIZONTAL_FORCE_FACTOR, 0f), true)
             applyLinearImpulse(Vector2(-accelX, 0F), JmpGame.playerBody.transform.position, true)
         }
+
+        JmpGame.maxHeightReached = max(JmpGame.playerBody.position.y, JmpGame.maxHeightReached);
+
         super.update(deltaTime)
 
     }
+
+
 
 }

@@ -13,8 +13,12 @@ import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.physics.box2d.*
 import com.google.inject.*
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.physics.box2d.joints.DistanceJoint
-import com.badlogic.gdx.physics.box2d.joints.DistanceJointDef
+import com.mygdx.game.JmpGame.Companion.playerBody
+import com.badlogic.gdx.graphics.g2d.BitmapFont
+
+
+
+
 
 
 class JmpGame : ApplicationAdapter() {
@@ -23,9 +27,11 @@ class JmpGame : ApplicationAdapter() {
     private lateinit var injector: Injector
 
     companion object {
+
         internal lateinit var img: Texture
         internal lateinit var playerBody: Body
         internal lateinit var floorBody: Body
+        internal var maxHeightReached = 0f;
     }
 
     override fun create() {
@@ -40,12 +46,14 @@ class JmpGame : ApplicationAdapter() {
         Gdx.input.inputProcessor = injector.getInstance(MyInputAdapter::class.java)
     }
 
+    public fun getBatch() : SpriteBatch { return batch }
+
     private fun createEntities(){
         val world = injector.getInstance(World::class.java)
         //player entity
         engine.addEntity(Entity().apply{
-            add(TextureRegionComponent(TextureRegion(JmpGame.img)))
-            //add(TextureComponent(img))
+            //add(TextureRegionComponent(TextureRegion(img)))
+            add(TextureComponent(img))
             add(TransformComponent(Vector2(Constants.SCREEN_MIDDLE_X,5F)))
 
             playerBody = world.createBody(BodyDef().apply {
@@ -56,7 +64,7 @@ class JmpGame : ApplicationAdapter() {
             }, 1.0F)
             playerBody.setTransform(transform.position, 0F)
             playerBody.isFixedRotation = true
-            playerBody.userData = EntityData("player", true)
+            playerBody.userData = EntityData("player", mutableListOf<Body>(), false)
             add(PhysicsComponent(playerBody))
 
         })
@@ -71,7 +79,7 @@ class JmpGame : ApplicationAdapter() {
             }, 1.0F)
             floorBody.setTransform(transform.position, 0F)
             add(PhysicsComponent(floorBody))
-            floorBody.userData = EntityData("floor", false)
+            floorBody.userData = EntityData("floor", mutableListOf<Body>(), false)
             floorBody.gravityScale = 0f
 
         })
@@ -79,13 +87,13 @@ class JmpGame : ApplicationAdapter() {
         world.setContactListener(listenerClass)
     }
 
-
     override fun render() {
 
         //Gdx.gl.glClearColor(0.3f, 0.7f, 0.7f, 1f)
         Gdx.gl.glClearColor(0f,0f,0f,1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         engine.update(Gdx.graphics.deltaTime)
+
     }
 
     override fun dispose() {
@@ -102,14 +110,13 @@ class MyInputAdapter @Inject constructor(private val camera: OrthographicCamera,
         println("ScreenX: $screenX        ScreenY: $screenY")
         val worldPosition = camera.unproject(Vector3(screenX.toFloat(), screenY.toFloat(),0f))
         println("WorldX: ${worldPosition.x}        WorldY: ${worldPosition.y}")
-        val data = JmpGame.playerBody.userData
+        val data = playerBody.userData
         if(data is EntityData){
-            if(data.canJump){
-                JmpGame.playerBody.linearVelocity = Vector2(JmpGame.playerBody.linearVelocity.x,0f)
-                JmpGame.playerBody.applyLinearImpulse(Vector2(0f, Constants.PLAYER_VERTICAL_FORCE_FACTOR),
-                        JmpGame.playerBody.transform.position,
+            if(!data.objsInContact.isEmpty()){
+                playerBody.linearVelocity = Vector2(playerBody.linearVelocity.x,0f)
+                playerBody.applyLinearImpulse(Vector2(0f, Constants.PLAYER_VERTICAL_FORCE_FACTOR),
+                        playerBody.transform.position,
                         true)
-                data.canJump = false
             }
         }
 
@@ -120,6 +127,6 @@ class MyInputAdapter @Inject constructor(private val camera: OrthographicCamera,
 
 
 val Int.pixelsToMeters: Float
-    get() = this / Constants.PIXELS_PER_METER
+    get() = this.toFloat() / Constants.PIXELS_PER_METER
 
 data class Systems(val list: List<Class<out EntitySystem>>)
