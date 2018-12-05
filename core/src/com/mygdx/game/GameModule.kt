@@ -23,9 +23,10 @@ class GameModule(private val myGdxGame: JmpGame) : Module {
                 PhysicsSystem::class.java,
                 BoxSpawnSystem::class.java,
                 PhysicsSynchronizationSystem::class.java,
-                //CamUpdateSystem::class.java,
+                CamUpdateSystem::class.java,
                 RenderingSystem::class.java,
-                PhysicsDebugSystem::class.java //, HudSystem::class.java
+                PhysicsDebugSystem::class.java,
+                HudSystem::class.java
         ))
     }
 
@@ -41,12 +42,12 @@ class GameModule(private val myGdxGame: JmpGame) : Module {
         }
     }
 
-//    @GuiCam
-//    @Provides
-//    @Singleton
-//    fun guiCam(): OrthographicCamera = OrthographicCamera().apply {
-//        setToOrtho(false)
-//    }
+    @GuiCam
+    @Provides
+    @Singleton
+    fun guiCam(): OrthographicCamera = OrthographicCamera().apply {
+        setToOrtho(false)
+    }
 
     //@WorldCam
     @Provides

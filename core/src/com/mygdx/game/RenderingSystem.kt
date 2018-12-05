@@ -15,7 +15,7 @@ import com.badlogic.gdx.physics.box2d.Manifold
 
 class RenderingSystem @Inject constructor(private val batch: SpriteBatch,
                                           private val camera: OrthographicCamera) :
-        IteratingSystem(Family.all(TransformComponent::class.java).one (TextureComponent::class.java, TextureRegionComponent::class.java).get()){
+        IteratingSystem(Family.all(TransformComponent::class.java).get()){
     override fun update(deltaTime: Float) {
         batch.projectionMatrix = camera.combined
         batch.begin()
@@ -24,6 +24,8 @@ class RenderingSystem @Inject constructor(private val batch: SpriteBatch,
     }
     override fun processEntity(entity: Entity, deltaTime: Float) {
         val position = entity.transform.position
+        val data = entity.physics.body.userData
+        //if(data is EntityData) println("processing entity " + data.tag)
         entity.tryGet(TextureRegionComponent)?.let {textureRegionComponent ->
             val img = textureRegionComponent.textureRegion
             val width = img.regionWidth.pixelsToMeters
@@ -56,7 +58,6 @@ class RenderingSystem @Inject constructor(private val batch: SpriteBatch,
 
         entity.tryGet(TextureComponent)?.let {textureComponent ->
             val img = textureComponent.texture
-            //println("Drawing a Texture!")
             batch.draw(img,
                     position.x - img.width.pixelsToMeters / 2.0f,
                     position.y - img.height.pixelsToMeters / 2.0f,

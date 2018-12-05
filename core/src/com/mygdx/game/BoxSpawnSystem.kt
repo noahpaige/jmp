@@ -26,8 +26,8 @@ class BoxSpawnSystem @Inject constructor(private val camera: OrthographicCamera,
             counter = 0f
             val pos = Vector2(Random().nextFloat() * (maxX - minX) + minX, camera.position.y + 30f)
             engine.addEntity(Entity().apply{
-                add(TextureRegionComponent(TextureRegion(JmpGame.img)))
-                //add(TextureComponent(JmpGame.img))
+                //add(TextureRegionComponent(TextureRegion(JmpGame.img)))
+                add(TextureComponent(JmpGame.img))
                 add(TransformComponent(Vector2(pos.x, pos.y), 0F, 0.25F))
 
                 val body = world.createBody(BodyDef().apply {
@@ -45,6 +45,8 @@ class BoxSpawnSystem @Inject constructor(private val camera: OrthographicCamera,
                 //body.setLinearVelocity(0f, -10f)
                 //body.userData = EntityData("block")
             })
+
+
             println("SPAWNED BOX AT " + pos.x + "    " + pos.y)
         }
         else{

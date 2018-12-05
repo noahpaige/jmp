@@ -7,6 +7,13 @@ import kotlin.math.max
 
 class JMPEngine : Engine() {
     override fun update(deltaTime: Float) {
+        when(JmpGame.gameState){
+            GameState.Running -> myUpdate(deltaTime)
+        }
+
+    }
+
+    fun myUpdate(deltaTime: Float){
         val accelX = Gdx.input.accelerometerX
         //println("accelX: " + accelX)
         JmpGame.playerBody.apply{

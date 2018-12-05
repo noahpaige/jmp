@@ -15,9 +15,7 @@ import com.google.inject.*
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.mygdx.game.JmpGame.Companion.playerBody
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-
-
-
+import com.badlogic.gdx.InputMultiplexer
 
 
 
@@ -31,19 +29,23 @@ class JmpGame : ApplicationAdapter() {
         internal lateinit var img: Texture
         internal lateinit var playerBody: Body
         internal lateinit var floorBody: Body
-        internal var maxHeightReached = 0f;
+        internal var maxHeightReached = 0f
+        internal var gameState = GameState.Running
     }
 
     override fun create() {
         batch = SpriteBatch()
         img = Texture("itsame.png")
         injector = Guice.createInjector(GameModule(myGdxGame = this))
+        val multiplexer = InputMultiplexer()
+        multiplexer.addProcessor(injector.getInstance(MyInputAdapter::class.java))
+        //multiplexer.addProcessor(injector.getInstance(UIInputAdapter::class.java))
+        Gdx.input.inputProcessor = multiplexer
         injector.getInstance(Systems::class.java).list.map {
             injector.getInstance(it)}.forEach{ system -> engine.addSystem(system)}
 
         createEntities()
         //use inpult multiplexor to manage inputs from UI vs game
-        Gdx.input.inputProcessor = injector.getInstance(MyInputAdapter::class.java)
     }
 
     public fun getBatch() : SpriteBatch { return batch }
@@ -54,7 +56,7 @@ class JmpGame : ApplicationAdapter() {
         engine.addEntity(Entity().apply{
             //add(TextureRegionComponent(TextureRegion(img)))
             add(TextureComponent(img))
-            add(TransformComponent(Vector2(Constants.SCREEN_MIDDLE_X,5F)))
+            add(TransformComponent(Vector2(Gdx.graphics.width.pixelsToMeters / 2.0f,5F)))
 
             playerBody = world.createBody(BodyDef().apply {
                 type = BodyDef.BodyType.DynamicBody
@@ -70,7 +72,7 @@ class JmpGame : ApplicationAdapter() {
         })
         //floor entity
         engine.addEntity(Entity().apply {
-            add(TransformComponent(Vector2(Constants.SCREEN_MIDDLE_X,-1f)))
+            add(TransformComponent(Vector2(Gdx.graphics.width.pixelsToMeters / 2.0f,-1f)))
             floorBody = world.createBody(BodyDef().apply {
                 type = BodyDef.BodyType.StaticBody
             })
@@ -102,14 +104,17 @@ class JmpGame : ApplicationAdapter() {
     }
 }
 
+class UIInputAdapter @Inject constructor() : InputAdapter() {
+
+}
 
 class MyInputAdapter @Inject constructor(private val camera: OrthographicCamera,
                                          private val engine: Engine,
                                          private val world: World) : InputAdapter() {
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-        println("ScreenX: $screenX        ScreenY: $screenY")
+        //println("ScreenX: $screenX        ScreenY: $screenY")
         val worldPosition = camera.unproject(Vector3(screenX.toFloat(), screenY.toFloat(),0f))
-        println("WorldX: ${worldPosition.x}        WorldY: ${worldPosition.y}")
+        //println("WorldX: ${worldPosition.x}        WorldY: ${worldPosition.y}")
         val data = playerBody.userData
         if(data is EntityData){
             if(!data.objsInContact.isEmpty()){
@@ -125,6 +130,7 @@ class MyInputAdapter @Inject constructor(private val camera: OrthographicCamera,
 
 }
 
+enum class GameState { Running, Paused, Dead }
 
 val Int.pixelsToMeters: Float
     get() = this.toFloat() / Constants.PIXELS_PER_METER
