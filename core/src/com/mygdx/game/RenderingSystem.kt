@@ -15,7 +15,7 @@ import com.badlogic.gdx.physics.box2d.Manifold
 
 class RenderingSystem @Inject constructor(private val batch: SpriteBatch,
                                           private val camera: OrthographicCamera) :
-        IteratingSystem(Family.all(TransformComponent::class.java).get()){
+        IteratingSystem(Family.all(TransformComponent::class.java, PhysicsComponent::class.java).get()){
     override fun update(deltaTime: Float) {
         batch.projectionMatrix = camera.combined
         batch.begin()
@@ -25,13 +25,14 @@ class RenderingSystem @Inject constructor(private val batch: SpriteBatch,
     override fun processEntity(entity: Entity, deltaTime: Float) {
         val position = entity.transform.position
         val data = entity.physics.body.userData
-        //if(data is EntityData) println("processing entity " + data.tag)
+        if(data is EntityData)
         entity.tryGet(TextureRegionComponent)?.let {textureRegionComponent ->
             val img = textureRegionComponent.textureRegion
             val width = img.regionWidth.pixelsToMeters
             val height = img.regionHeight.pixelsToMeters
             val scale = entity.transform.scale
             //println("Drawing a TextureRegion!")
+            //batch.setColor(data.color.r, data.color.g, data.color.b, data.color.a)
             batch.draw(img,
                     position.x - width  / 2, position.y - height / 2,
                     width / 2f,
@@ -58,6 +59,8 @@ class RenderingSystem @Inject constructor(private val batch: SpriteBatch,
 
         entity.tryGet(TextureComponent)?.let {textureComponent ->
             val img = textureComponent.texture
+            val data = entity.physics.body.userData
+            if(data is EntityData) batch.setColor(data.color.r, data.color.g, data.color.b, data.color.a)
             batch.draw(img,
                     position.x - img.width.pixelsToMeters / 2.0f,
                     position.y - img.height.pixelsToMeters / 2.0f,

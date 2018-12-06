@@ -12,27 +12,27 @@ com.badlogic.gdx.graphics.g2d.BitmapFont: {
 }
 com.badlogic.gdx.graphics.Color: {
 	color: {
-		r: 0
+		r: .3
 		g: 1
-		b: 1
+		b: .70
 		a: 1
 	}
 	selected: {
-		r: 0
-		g: .4
-		b: .4
+		r: .07
+		g: .49
+		b: .04
 		a: 1
 	}
 	text: {
-		r: .580392156
+		r: .5
 		g: 1
-		b: 1
+		b: .5
 		a: 1
 	}
 	text-selected: {
-		r: 1
+		r: .77
 		g: 1
-		b: 1
+		b: .75
 		a: 1
 	}
 }

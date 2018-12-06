@@ -13,7 +13,7 @@ class CamUpdateSystem @Inject constructor(private val world: World,
 
         if(JmpGame.playerBody.position.y > camera.position.y)
         {
-            println("UPDATING CAM")
+            //println("UPDATING CAM")
             desiredCamPos.y = playerBody.position.y + 10.0f * deltaTime;
         }
 

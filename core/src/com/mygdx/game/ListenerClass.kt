@@ -44,47 +44,79 @@ class ListenerClass @Inject constructor(private val world : World): ContactListe
         val entityDataA = bodyA.userData
         val entityDataB = bodyB.userData
         val contactPos = contact.worldManifold.points[0]
-        if(entityDataA is EntityData && entityDataB is EntityData)
-        {
-            if(entityDataA.tag == "player")
-            {
-                //println("Player beginning contact A")
-                entityDataA.objsInContact.add(bodyB)
-                entityDataA.isStanding = isPlayerStanding(JmpGame.playerBody)
-                //println("Head bumped: " + isPlayerHeadBumped(bodyA, bodyB))
-                //println("standing: " + entityDataA.isStanding)
-                if(isPlayerHeadBumped(bodyA, bodyB, contactPos) && entityDataA.isStanding)
-                {
-                    JmpGame.gameState = GameState.Dead
-                    println("PLAYER DIED")
-                }
-            }
-            else if(entityDataB.tag == "player")
-            {
-                //println("Player beginning contact B")
-                entityDataA.objsInContact.add(bodyA)
-                entityDataB.isStanding = isPlayerStanding(JmpGame.playerBody)
-                //println("Head bumped: " + isPlayerHeadBumped(bodyB, bodyA))
-                //println("standing: " + entityDataB.isStanding)
-                if(isPlayerHeadBumped(bodyB, bodyA, contactPos) && entityDataB.isStanding)
-                {
-                    JmpGame.gameState = GameState.Dead
-                    println("PLAYER DIED")
-                }
-            }
-            if(entityDataA.isStanding || entityDataB.isStanding) println("STANDING")
+        if (checkPlayerCollision(bodyA, bodyB, entityDataA, entityDataB, contactPos)) return
 
-//            if(entityDataA.tag != "player" && entityDataB.tag != "player")
-//            {
-//                println("satisfies IF")
-//                val joint = DistanceJointDef()
-//                joint.bodyA = bodyA
-//                joint.bodyB = bodyB
+        if(entityDataA is EntityData && entityDataB is EntityData) {
+            if(entityDataA.tag == "block"){
+                if (entityDataB.tag == "block"){
+                    val posA = bodyA.position
+                    val posB = bodyB.position
+
+                    bodyA.apply {
+                        type = BodyDef.BodyType.StaticBody
+                        isAwake = false
+                        //isActive = false
+                    }
+                    bodyB.apply {
+                        type = BodyDef.BodyType.StaticBody
+                        isAwake = false
+                        //isActive = false
+                    }
+
+
+//                    for (fix in bodyA.fixtureList) bodyA.destroyFixture(fix)
+//                    for (fix in bodyB.fixtureList) bodyB.destroyFixture(fix)
 //
-//                world.createJoint(joint)
-//            }
+//                    world.destroyBody(bodyA)
+//                    world.destroyBody(bodyB)
+                    }
+                }
+            }
         }
+
     }
+
+
+fun checkPlayerCollision(bodyA : Body,
+                         bodyB : Body,
+                         entityDataA: Any,
+                         entityDataB: Any,
+                         contactPos : Vector2) : Boolean
+{
+
+    if(entityDataA is EntityData && entityDataB is EntityData)
+    {
+        if(entityDataA.tag == "player")
+        {
+            //println("Player beginning contact A")
+            entityDataA.objsInContact.add(bodyB)
+            entityDataA.isStanding = isPlayerStanding(JmpGame.playerBody)
+            //println("Head bumped: " + isPlayerHeadBumped(bodyA, bodyB))
+            //println("standing: " + entityDataA.isStanding)
+            if(isPlayerHeadBumped(bodyA, bodyB, contactPos) && entityDataA.isStanding)
+            {
+                JmpGame.gameState = GameState.Dead
+                println("PLAYER DIED")
+            }
+            return true
+        }
+        else if(entityDataB.tag == "player")
+        {
+            //println("Player beginning contact B")
+            entityDataA.objsInContact.add(bodyA)
+            entityDataB.isStanding = isPlayerStanding(JmpGame.playerBody)
+            //println("Head bumped: " + isPlayerHeadBumped(bodyB, bodyA))
+            //println("standing: " + entityDataB.isStanding)
+            if(isPlayerHeadBumped(bodyB, bodyA, contactPos) && entityDataB.isStanding)
+            {
+                JmpGame.gameState = GameState.Dead
+                println("PLAYER DIED")
+            }
+            return true
+        }
+        if(entityDataA.isStanding || entityDataB.isStanding) println("STANDING")
+    }
+    return false
 }
 
 fun isPlayerStanding(player : Body) : Boolean

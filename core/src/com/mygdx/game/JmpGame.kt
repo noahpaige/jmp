@@ -16,7 +16,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.mygdx.game.JmpGame.Companion.playerBody
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.InputMultiplexer
-
+import com.badlogic.gdx.graphics.Color
+import java.awt.Button
 
 
 class JmpGame : ApplicationAdapter() {
@@ -33,14 +34,17 @@ class JmpGame : ApplicationAdapter() {
         internal var gameState = GameState.Running
     }
 
+    fun getEngine() : JMPEngine {
+        return engine
+    }
+
     override fun create() {
         batch = SpriteBatch()
         img = Texture("itsame.png")
         injector = Guice.createInjector(GameModule(myGdxGame = this))
-        val multiplexer = InputMultiplexer()
-        multiplexer.addProcessor(injector.getInstance(MyInputAdapter::class.java))
+        //val multiplexer = InputMultiplexer()
         //multiplexer.addProcessor(injector.getInstance(UIInputAdapter::class.java))
-        Gdx.input.inputProcessor = multiplexer
+        //Gdx.input.inputProcessor = multiplexer
         injector.getInstance(Systems::class.java).list.map {
             injector.getInstance(it)}.forEach{ system -> engine.addSystem(system)}
 
@@ -66,7 +70,7 @@ class JmpGame : ApplicationAdapter() {
             }, 1.0F)
             playerBody.setTransform(transform.position, 0F)
             playerBody.isFixedRotation = true
-            playerBody.userData = EntityData("player", mutableListOf<Body>(), false)
+            playerBody.userData = EntityData("player", mutableListOf<Body>(), false, Color(1f,1f,1f,1f))
             add(PhysicsComponent(playerBody))
 
         })
@@ -81,7 +85,7 @@ class JmpGame : ApplicationAdapter() {
             }, 1.0F)
             floorBody.setTransform(transform.position, 0F)
             add(PhysicsComponent(floorBody))
-            floorBody.userData = EntityData("floor", mutableListOf<Body>(), false)
+            floorBody.userData = EntityData("floor", mutableListOf<Body>(), false, Color(1f,1f,1f,1f))
             floorBody.gravityScale = 0f
 
         })
@@ -102,32 +106,6 @@ class JmpGame : ApplicationAdapter() {
         batch.dispose()
         img.dispose()
     }
-}
-
-class UIInputAdapter @Inject constructor() : InputAdapter() {
-
-}
-
-class MyInputAdapter @Inject constructor(private val camera: OrthographicCamera,
-                                         private val engine: Engine,
-                                         private val world: World) : InputAdapter() {
-    override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-        //println("ScreenX: $screenX        ScreenY: $screenY")
-        val worldPosition = camera.unproject(Vector3(screenX.toFloat(), screenY.toFloat(),0f))
-        //println("WorldX: ${worldPosition.x}        WorldY: ${worldPosition.y}")
-        val data = playerBody.userData
-        if(data is EntityData){
-            if(!data.objsInContact.isEmpty()){
-                playerBody.linearVelocity = Vector2(playerBody.linearVelocity.x,0f)
-                playerBody.applyLinearImpulse(Vector2(0f, Constants.PLAYER_VERTICAL_FORCE_FACTOR),
-                        playerBody.transform.position,
-                        true)
-            }
-        }
-
-        return true
-    }
-
 }
 
 enum class GameState { Running, Paused, Dead }

@@ -9,5 +9,6 @@ class Constants {
         const val SCREEN_MIDDLE_Y = 20F
         const val PLAYER_VERTICAL_FORCE_FACTOR = 50f
         const val PLAYER_HORIZONTAL_FORCE_FACTOR = 150f
+        const val BLOCK_WIDTH = 2.0f
     }
 }

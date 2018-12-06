@@ -12,20 +12,8 @@ class JMPEngine : Engine() {
         }
 
     }
-
     fun myUpdate(deltaTime: Float){
-        val accelX = Gdx.input.accelerometerX
-        //println("accelX: " + accelX)
-        JmpGame.playerBody.apply{
-            val adjustedAccelX = accelX * -Constants.PLAYER_HORIZONTAL_FORCE_FACTOR
-            //applyForceToCenter(Vector2(accelX * -Constants.PLAYER_HORIZONTAL_FORCE_FACTOR, 0f), true)
-            applyLinearImpulse(Vector2(-accelX, 0F), JmpGame.playerBody.transform.position, true)
-        }
-
-        JmpGame.maxHeightReached = max(JmpGame.playerBody.position.y, JmpGame.maxHeightReached);
-
         super.update(deltaTime)
-
     }
 
 
