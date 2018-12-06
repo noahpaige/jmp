@@ -10,11 +10,13 @@ class CamUpdateSystem @Inject constructor(private val world: World,
                                           private val camera: OrthographicCamera) : EntitySystem() {
     var desiredCamPos = camera.position;
     override fun update(deltaTime: Float) {
+        var adjustedDeltaTime = deltaTime
+        if (JmpGame.gameState != GameState.Running) adjustedDeltaTime = 0f
 
         if(JmpGame.playerBody.position.y > camera.position.y)
         {
             //println("UPDATING CAM")
-            desiredCamPos.y = playerBody.position.y + 10.0f * deltaTime;
+            desiredCamPos.y = playerBody.position.y + 10.0f * adjustedDeltaTime;
         }
 
         camera.position.lerp(desiredCamPos, 0.01f);

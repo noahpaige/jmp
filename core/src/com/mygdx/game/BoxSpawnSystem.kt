@@ -2,6 +2,7 @@ package com.mygdx.game
 
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntitySystem
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -26,6 +27,8 @@ class BoxSpawnSystem @Inject constructor(private val camera: OrthographicCamera,
         }
     }
     override fun update(deltaTime: Float) {
+        var adjustedDeltaTime = deltaTime
+        if (JmpGame.gameState != GameState.Running) adjustedDeltaTime = 0f
         if(counter > 2) {
             counter = 0f
             val pos = spawnPoints[0]
@@ -57,7 +60,7 @@ class BoxSpawnSystem @Inject constructor(private val camera: OrthographicCamera,
             addPoint(spawnPoints, camera.position.y)
         }
         else{
-            counter += deltaTime
+            counter += adjustedDeltaTime
         }
     }
 }
@@ -67,7 +70,7 @@ fun calcColor(posX : Float) : Color {
     var gfactor = rfactor * 2f
     var bfactor = rfactor * 3f
 
-    println("rfactor: " + rfactor)
+    //println("rfactor: " + rfactor)
 
     if (rfactor >= 0.5f)
         gfactor = (gfactor - 0.5f) * 2f

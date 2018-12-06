@@ -7,7 +7,10 @@ import com.google.inject.Inject
 class PhysicsSystem @Inject constructor(private val world: World) : EntitySystem() {
     private var accumulator = 0f
     override fun update(deltaTime: Float) {
-        val frameTime = Math.min(deltaTime, 0.25F)
+        var adjustedDeltaTime = deltaTime
+        if (JmpGame.gameState != GameState.Running) adjustedDeltaTime = 0f
+
+        val frameTime = Math.min(adjustedDeltaTime, 0.25F)
         accumulator += frameTime
         while (accumulator >= TIME_STEP) {
             world.step(TIME_STEP, VELOCITY_ITERATIONS, VELOCITY_POSITIONS)

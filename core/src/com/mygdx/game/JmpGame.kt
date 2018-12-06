@@ -35,10 +35,6 @@ class JmpGame : ApplicationAdapter() {
         internal var gameState = GameState.Running
     }
 
-    fun getEngine() : JMPEngine {
-        return engine
-    }
-
     override fun create() {
         batch = SpriteBatch()
         playerImg = Texture("itsame.png")
@@ -111,7 +107,7 @@ class JmpGame : ApplicationAdapter() {
     }
 }
 
-enum class GameState { Running, Paused, Dead }
+enum class GameState { MainMenu, Paused, Dead, Running }
 
 val Int.pixelsToMeters: Float
     get() = this.toFloat() / Constants.PIXELS_PER_METER

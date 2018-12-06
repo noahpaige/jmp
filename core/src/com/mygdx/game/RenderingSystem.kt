@@ -17,9 +17,11 @@ class RenderingSystem @Inject constructor(private val batch: SpriteBatch,
                                           private val camera: OrthographicCamera) :
         IteratingSystem(Family.all(TransformComponent::class.java, PhysicsComponent::class.java).get()){
     override fun update(deltaTime: Float) {
+        var adjustedDeltaTime = deltaTime
+        if (JmpGame.gameState != GameState.Running) adjustedDeltaTime = 0f
         batch.projectionMatrix = camera.combined
         batch.begin()
-        super.update(deltaTime)
+        super.update(adjustedDeltaTime)
         batch.end()
     }
     override fun processEntity(entity: Entity, deltaTime: Float) {

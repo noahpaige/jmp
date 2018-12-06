@@ -6,14 +6,15 @@ import com.badlogic.gdx.math.Vector2
 import kotlin.math.max
 
 class JMPEngine : Engine() {
+
+
     override fun update(deltaTime: Float) {
-        when(JmpGame.gameState){
-            GameState.Running -> myUpdate(deltaTime)
-        }
+        myUpdate(deltaTime)
 
     }
-    fun myUpdate(deltaTime: Float){
+    private fun myUpdate(deltaTime: Float){
         super.update(deltaTime)
+
     }
 
 

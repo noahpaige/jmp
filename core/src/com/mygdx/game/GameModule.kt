@@ -26,7 +26,7 @@ class GameModule(private val myGdxGame: JmpGame) : Module {
                 PhysicsSynchronizationSystem::class.java,
                 CamUpdateSystem::class.java,
                 RenderingSystem::class.java,
-                PhysicsDebugSystem::class.java,
+                //PhysicsDebugSystem::class.java,
                 HudSystem::class.java
         ))
     }
