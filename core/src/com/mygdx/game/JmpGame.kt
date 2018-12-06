@@ -27,7 +27,8 @@ class JmpGame : ApplicationAdapter() {
 
     companion object {
 
-        internal lateinit var img: Texture
+        internal lateinit var playerImg: Texture
+        internal lateinit var blockImg: Texture
         internal lateinit var playerBody: Body
         internal lateinit var floorBody: Body
         internal var maxHeightReached = 0f
@@ -40,7 +41,8 @@ class JmpGame : ApplicationAdapter() {
 
     override fun create() {
         batch = SpriteBatch()
-        img = Texture("itsame.png")
+        playerImg = Texture("itsame.png")
+        blockImg = Texture("faded5.png")
         injector = Guice.createInjector(GameModule(myGdxGame = this))
         //val multiplexer = InputMultiplexer()
         //multiplexer.addProcessor(injector.getInstance(UIInputAdapter::class.java))
@@ -59,14 +61,14 @@ class JmpGame : ApplicationAdapter() {
         //player entity
         engine.addEntity(Entity().apply{
             //add(TextureRegionComponent(TextureRegion(img)))
-            add(TextureComponent(img))
+            add(TextureComponent(playerImg))
             add(TransformComponent(Vector2(Gdx.graphics.width.pixelsToMeters / 2.0f,5F)))
 
             playerBody = world.createBody(BodyDef().apply {
                 type = BodyDef.BodyType.DynamicBody
             })
             playerBody.createFixture(PolygonShape().apply {
-                setAsBox(img.width.pixelsToMeters / 2.0F, img.height.pixelsToMeters / 2.0F)
+                setAsBox(playerImg.width.pixelsToMeters / 2.0F, playerImg.height.pixelsToMeters / 2.0F)
             }, 1.0F)
             playerBody.setTransform(transform.position, 0F)
             playerBody.isFixedRotation = true
@@ -77,11 +79,12 @@ class JmpGame : ApplicationAdapter() {
         //floor entity
         engine.addEntity(Entity().apply {
             add(TransformComponent(Vector2(Gdx.graphics.width.pixelsToMeters / 2.0f,-1f)))
+            add(TextureComponent(blockImg))
             floorBody = world.createBody(BodyDef().apply {
                 type = BodyDef.BodyType.StaticBody
             })
             floorBody.createFixture(PolygonShape().apply {
-                setAsBox(20F, 1F)
+                setAsBox(100f, 1F)
             }, 1.0F)
             floorBody.setTransform(transform.position, 0F)
             add(PhysicsComponent(floorBody))
@@ -104,7 +107,7 @@ class JmpGame : ApplicationAdapter() {
 
     override fun dispose() {
         batch.dispose()
-        img.dispose()
+        playerImg.dispose()
     }
 }
 

@@ -31,7 +31,7 @@ class BoxSpawnSystem @Inject constructor(private val camera: OrthographicCamera,
             val pos = spawnPoints[0]
             engine.addEntity(Entity().apply{
                 //add(TextureRegionComponent(TextureRegion(JmpGame.img)))
-                add(TextureComponent(JmpGame.img))
+                add(TextureComponent(JmpGame.blockImg))
                 add(TransformComponent(Vector2(pos.x, pos.y), 0F, 0.25F))
 
                 val body = world.createBody(BodyDef().apply {
@@ -43,7 +43,11 @@ class BoxSpawnSystem @Inject constructor(private val camera: OrthographicCamera,
                 body.setTransform(transform.position, 0F)
                 body.isFixedRotation = true
                 add(PhysicsComponent(body))
-                body.userData = EntityData("block", mutableListOf<Body>(), false, getRandomColor())
+
+                body.userData = EntityData("block",
+                        mutableListOf<Body>(),
+                        false,
+                        calcColor(pos.x))
                 body.gravityScale = 0.2f
                 body.isSleepingAllowed = false
                 //body.setLinearVelocity(0f, -10f)
@@ -56,6 +60,28 @@ class BoxSpawnSystem @Inject constructor(private val camera: OrthographicCamera,
             counter += deltaTime
         }
     }
+}
+
+fun calcColor(posX : Float) : Color {
+    var rfactor = (Gdx.graphics.width.pixelsToMeters - posX) / Gdx.graphics.width.pixelsToMeters
+    var gfactor = rfactor * 2f
+    var bfactor = rfactor * 3f
+
+    println("rfactor: " + rfactor)
+
+    if (rfactor >= 0.5f)
+        gfactor = (gfactor - 0.5f) * 2f
+    if (rfactor >= 0.333f && rfactor < 0.667f)
+        bfactor = (rfactor - 0.333f) * 3f
+    else if(rfactor >= 0.667f)
+        bfactor = (rfactor - 0.667f) * 3f
+
+    rfactor = rfactor * 0.7f + 0.3f
+    gfactor = gfactor * 0.7f + 0.3f
+    bfactor = bfactor * 0.7f + 0.3f
+
+    return Color(rfactor, gfactor, bfactor, 1f)
+
 }
 
 fun getRandomColor() : Color

@@ -130,7 +130,7 @@ fun isPlayerStanding(player : Body) : Boolean
             if(odata is EntityData)
             {
                 if(odata.tag == "floor"){ return true }
-                val pwidth = JmpGame.img.width.pixelsToMeters / 2.0F
+                val pwidth = JmpGame.playerImg.width.pixelsToMeters / 2.0F
                 val owidth = 2.0f
                 if(other.position.y < player.position.y)
                 {
@@ -151,7 +151,7 @@ fun isPlayerHeadBumped(player : Body, other : Body, pos : Vector2) : Boolean
     val odata = other.userData
     if(odata is EntityData)
     {
-        val pwidth = JmpGame.img.width.pixelsToMeters / 2.0F
+        val pwidth = JmpGame.playerImg.width.pixelsToMeters / 2.0F
         val owidth = 2.0f
         if(other.position.y > player.position.y)
         {
