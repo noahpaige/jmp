@@ -5,7 +5,7 @@ import com.badlogic.gdx.physics.box2d.*
 import com.google.inject.Inject
 
 
-class ListenerClass @Inject constructor(private val world : World): ContactListener {
+class ListenerClass : ContactListener {
     override fun preSolve(contact: Contact?, oldManifold: Manifold?) {
 
     }
@@ -55,26 +55,17 @@ class ListenerClass @Inject constructor(private val world : World): ContactListe
                     bodyA.apply {
                         type = BodyDef.BodyType.StaticBody
                         isAwake = false
-                        //isActive = false
                     }
                     bodyB.apply {
                         type = BodyDef.BodyType.StaticBody
                         isAwake = false
-                        //isActive = false
-                    }
-
-
-//                    for (fix in bodyA.fixtureList) bodyA.destroyFixture(fix)
-//                    for (fix in bodyB.fixtureList) bodyB.destroyFixture(fix)
-//
-//                    world.destroyBody(bodyA)
-//                    world.destroyBody(bodyB)
                     }
                 }
             }
         }
-
     }
+
+}
 
 
 fun checkPlayerCollision(bodyA : Body,
@@ -88,9 +79,9 @@ fun checkPlayerCollision(bodyA : Body,
     {
         if(entityDataA.tag == "player")
         {
-            //println("Player beginning contact A")
+            println("Player beginning contact A")
             entityDataA.objsInContact.add(bodyB)
-            entityDataA.isStanding = isPlayerStanding(JmpGame.playerBody)
+            entityDataA.isStanding = isPlayerStanding(bodyA)
             //println("Head bumped: " + isPlayerHeadBumped(bodyA, bodyB))
             //println("standing: " + entityDataA.isStanding)
             if(isPlayerHeadBumped(bodyA, bodyB, contactPos) && entityDataA.isStanding)
@@ -102,9 +93,9 @@ fun checkPlayerCollision(bodyA : Body,
         }
         else if(entityDataB.tag == "player")
         {
-            //println("Player beginning contact B")
+            println("Player beginning contact B")
             entityDataA.objsInContact.add(bodyA)
-            entityDataB.isStanding = isPlayerStanding(JmpGame.playerBody)
+            entityDataB.isStanding = isPlayerStanding(bodyB)
             //println("Head bumped: " + isPlayerHeadBumped(bodyB, bodyA))
             //println("standing: " + entityDataB.isStanding)
             if(isPlayerHeadBumped(bodyB, bodyA, contactPos) && entityDataB.isStanding)
@@ -114,7 +105,6 @@ fun checkPlayerCollision(bodyA : Body,
             }
             return true
         }
-        if(entityDataA.isStanding || entityDataB.isStanding) println("STANDING")
     }
     return false
 }

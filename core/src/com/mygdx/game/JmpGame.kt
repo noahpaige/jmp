@@ -3,42 +3,40 @@ package com.mygdx.game
 import com.badlogic.ashley.core.*
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.graphics.GL20
-import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.physics.box2d.*
+import com.badlogic.gdx.utils.Array
 import com.google.inject.*
-import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.mygdx.game.JmpGame.Companion.playerBody
-import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.graphics.Color
-import java.awt.Button
 
 
 class JmpGame : ApplicationAdapter() {
     internal lateinit var batch: SpriteBatch
     private val engine = JMPEngine()
     private lateinit var injector: Injector
+    private lateinit var world : World
 
     companion object {
 
         internal lateinit var playerImg: Texture
         internal lateinit var blockImg: Texture
+        internal lateinit var backgroundImg: Texture
         internal lateinit var playerBody: Body
         internal lateinit var floorBody: Body
         internal var maxHeightReached = 0f
-        internal var gameState = GameState.Running
+        internal var gameState = GameState.MainMenu
+        internal var resetGame = false
     }
 
     override fun create() {
         batch = SpriteBatch()
         playerImg = Texture("itsame.png")
-        blockImg = Texture("faded5.png")
+        blockImg = Texture("faded7.png")
+        backgroundImg = Texture("neonPattern2.jpg")
+        backgroundImg.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat)
         injector = Guice.createInjector(GameModule(myGdxGame = this))
         //val multiplexer = InputMultiplexer()
         //multiplexer.addProcessor(injector.getInstance(UIInputAdapter::class.java))
@@ -47,13 +45,10 @@ class JmpGame : ApplicationAdapter() {
             injector.getInstance(it)}.forEach{ system -> engine.addSystem(system)}
 
         createEntities()
-        //use inpult multiplexor to manage inputs from UI vs game
     }
 
-    public fun getBatch() : SpriteBatch { return batch }
-
     private fun createEntities(){
-        val world = injector.getInstance(World::class.java)
+        world = injector.getInstance(World::class.java)
         //player entity
         engine.addEntity(Entity().apply{
             //add(TextureRegionComponent(TextureRegion(img)))
@@ -68,7 +63,7 @@ class JmpGame : ApplicationAdapter() {
             }, 1.0F)
             playerBody.setTransform(transform.position, 0F)
             playerBody.isFixedRotation = true
-            playerBody.userData = EntityData("player", mutableListOf<Body>(), false, Color(1f,1f,1f,1f))
+            playerBody.userData = EntityData("player", mutableListOf<Body>(), true, Color(1f,1f,1f,1f))
             add(PhysicsComponent(playerBody))
 
         })
@@ -88,11 +83,27 @@ class JmpGame : ApplicationAdapter() {
             floorBody.gravityScale = 0f
 
         })
-        val listenerClass = ListenerClass(world)
+        val listenerClass = ListenerClass()
         world.setContactListener(listenerClass)
     }
 
+
     override fun render() {
+
+        if(resetGame)
+        {
+            var bodies = Array<Body>()
+            world.getBodies(bodies)
+            for (i in 0 until bodies.size) {
+                if (!world.isLocked)
+                    world.destroyBody(bodies[i])
+            }
+            engine.removeAllEntities()
+            createEntities()
+            maxHeightReached = 0f
+            engine.getSystem(CamUpdateSystem::class.java).resetCam()
+            resetGame = false
+        }
 
         //Gdx.gl.glClearColor(0.3f, 0.7f, 0.7f, 1f)
         Gdx.gl.glClearColor(0f,0f,0f,1f)
@@ -111,5 +122,8 @@ enum class GameState { MainMenu, Paused, Dead, Running }
 
 val Int.pixelsToMeters: Float
     get() = this.toFloat() / Constants.PIXELS_PER_METER
+
+val Float.MetersToPixels: Int
+    get() = (this * Constants.PIXELS_PER_METER).toInt()
 
 data class Systems(val list: List<Class<out EntitySystem>>)

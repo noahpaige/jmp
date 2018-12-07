@@ -30,6 +30,8 @@ class Hud @Inject constructor(
     private val deadStage      = Stage(viewport, spriteBatch)
     private val runningStage   = Stage(viewport, spriteBatch)
 
+    private val pixBuffer = 10
+
 
     init {
         val skin = Skin(Gdx.files.internal("neon/skin/neon-ui.json"), TextureAtlas("neon/skin/neon-ui.atlas"))
@@ -38,16 +40,32 @@ class Hud @Inject constructor(
         buildDeadStage(skin)
         buildRunningStage(skin)
 
-        Gdx.input.inputProcessor = RunningInputAdapter(cam, runningStage)
+        Gdx.input.inputProcessor = MainMenuInputAdapter(cam, mainMenuStage)
     }
 
     fun update(deltaTime : Float) {
         when(JmpGame.gameState)
         {
-            GameState.MainMenu -> updateMainMenuStage(deltaTime)
-            GameState.Paused   -> updatePauseMenuStage(deltaTime)
-            GameState.Dead     -> updateDeadStage(deltaTime)
-            GameState.Running  -> updateRunningStage(deltaTime)
+            GameState.MainMenu ->
+            {
+                Gdx.input.inputProcessor = MainMenuInputAdapter(cam, mainMenuStage)
+                updateMainMenuStage(deltaTime)
+            }
+            GameState.Paused   ->
+            {
+                Gdx.input.inputProcessor = PauseMenuInputAdapter(cam, pauseMenuStage)
+                updatePauseMenuStage(deltaTime)
+            }
+            GameState.Dead     ->
+            {
+                Gdx.input.inputProcessor = DeadInputAdapter(cam, deadStage)
+                updateDeadStage(deltaTime)
+            }
+            GameState.Running  ->
+            {
+                Gdx.input.inputProcessor = RunningInputAdapter(cam, runningStage)
+                updateRunningStage(deltaTime)
+            }
         }
 
     }
@@ -63,38 +81,92 @@ class Hud @Inject constructor(
     }
 
     private fun buildMainMenuStage(skin : Skin) {
+        val button = TextButton("PLAY", skin).apply {
+            width  = 400f
+            height = 200f
+            setPosition(Gdx.graphics.width  / 2.0f - width  / 2f,
+                        Gdx.graphics.height / 3.0f - height / 2f)
+            label.setFontScale(2f)
+        }
+        val field = Label("JMP GAME", skin).apply {
+            width  = 400f
+            height = 200f
+            setPosition(Gdx.graphics.width  / 2f      - width  / 2f,
+                        Gdx.graphics.height / 3f * 2f - height / 2f)
+            setFontScale(2f)
+        }
+        mainMenuStage.addActor(field)
+        mainMenuStage.addActor(button)
 
     }
     private fun buildPauseMenuStage(skin : Skin) {
+        val button = TextButton("RESUME", skin).apply {
+            width  = 400f
+            height = 200f
+            setPosition(Gdx.graphics.width  / 2.0f - width / 2f,
+                    Gdx.graphics.height / 3.0f - height)
+            label.setFontScale(2f)
+        }
+        val field = Label("GAME PAUSED", skin).apply {
+            width  = 400f
+            height = 200f
+            setPosition(Gdx.graphics.width  / 2f      - width  / 2f,
+                        Gdx.graphics.height / 3f * 2f - height / 2f)
+            setFontScale(2f)
+        }
+        pauseMenuStage.addActor(field)
+        pauseMenuStage.addActor(button)
 
     }
     private fun buildDeadStage(skin : Skin) {
+        val button = TextButton("PLAY AGAIN", skin).apply {
+            width  = 400f
+            height = 200f
+            setPosition(Gdx.graphics.width  / 2.0f - width  / 2f,
+                        Gdx.graphics.height / 3.0f - height / 2f)
+            label.setFontScale(2f)
+        }
+        val field = Label("GAME OVER", skin).apply {
+            width  = 400f
+            height = 200f
+            setPosition(Gdx.graphics.width  / 2f      - width  / 2f,
+                        Gdx.graphics.height / 4f * 5f - height / 2f)
+            setFontScale(2f)
+        }
+        deadStage.addActor(field)
+        deadStage.addActor(button)
 
     }
 
     private fun buildRunningStage(skin : Skin) {
-        val button = TextButton("ButtonText", skin).apply {
-            width = 200f
+        val button = TextButton("| |", skin).apply {
+            width = 100f
             height = 100f
-            setPosition(Gdx.graphics.width - 210f, Gdx.graphics.height - 110f)
+            setPosition(Gdx.graphics.width  - width  - pixBuffer,
+                        Gdx.graphics.height - height - pixBuffer)
+            label.setFontScale(2f)
         }
         val field = Label("0", skin).apply {
             width = 200f
             height = 50f
-            setPosition(Gdx.graphics.width / 2f - 100f, Gdx.graphics.height - 60f)
-            setFontScale(2f)
+            setPosition(Gdx.graphics.width  / 2f - width  / 2f - pixBuffer,
+                        Gdx.graphics.height      - height      - pixBuffer)
+            setFontScale(4f)
         }
         runningStage.addActor(field)
         runningStage.addActor(button)
     }
 
     private fun updateMainMenuStage(deltaTime: Float) {
+        mainMenuStage.act(deltaTime)
 
     }
     private fun updatePauseMenuStage(deltaTime: Float) {
+        pauseMenuStage.act(deltaTime)
 
     }
     private fun updateDeadStage(deltaTime: Float) {
+        deadStage.act(deltaTime)
 
     }
     private fun updateRunningStage(deltaTime: Float) {
@@ -114,43 +186,6 @@ class HudSystem @Inject constructor(private val hud: Hud) : EntitySystem() {
         hud.update(deltaTime)
         hud.draw()
     }
-}
-
-class RunningInputAdapter @Inject constructor(private val camera : OrthographicCamera,
-                                              private val stage  : Stage) : InputAdapter() {
-    override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-        val worldPosition = camera.unproject(Vector3(screenX.toFloat(), screenY.toFloat(),0f))
-
-        for (actor in stage.actors)
-        {
-            if (actor is TextButton)
-            {
-                if (actor.isHit(screenX,
-                                Gdx.graphics.height - screenY))
-                {
-                    println("GOTEE")
-                    actor.setText("GOTEE")
-                    return true
-                }
-            }
-        }
-        // this is a bad place for this.
-        // this makes the player jump when the screen is tapped
-        val data = JmpGame.playerBody.userData
-        if(data is EntityData){
-            if(!data.objsInContact.isEmpty()){
-                JmpGame.playerBody.linearVelocity = Vector2(JmpGame.playerBody.linearVelocity.x,0f)
-                JmpGame.playerBody.applyLinearImpulse(Vector2(0f, Constants.PLAYER_VERTICAL_FORCE_FACTOR),
-                        JmpGame.playerBody.transform.position,
-                        true)
-            }
-        }
-
-        return true
-    }
-
-
-
 }
 
 fun Actor.centerOnScreen() {

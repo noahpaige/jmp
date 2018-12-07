@@ -12,9 +12,9 @@ com.badlogic.gdx.graphics.g2d.BitmapFont: {
 }
 com.badlogic.gdx.graphics.Color: {
 	color: {
-		r: .3
-		g: 1
-		b: .70
+		r: 1
+		g: 0.05
+		b: 0.3
 		a: 1
 	}
 	selected: {
@@ -24,15 +24,15 @@ com.badlogic.gdx.graphics.Color: {
 		a: 1
 	}
 	text: {
-		r: .5
+		r: 1
 		g: 1
-		b: .5
+		b: 1
 		a: 1
 	}
 	text-selected: {
-		r: .77
-		g: 1
-		b: .75
+		r: 1
+		g: 0.2
+		b: 0.6
 		a: 1
 	}
 }
@@ -287,7 +287,7 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	}
 	over: {
 		font: font-over
-		fontColor: text
+		fontColor: text-selected
 	}
 	pressed: {
 		font: font-pressed
